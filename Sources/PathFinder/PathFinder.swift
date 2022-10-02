@@ -24,7 +24,7 @@ public struct Path: Equatable {
     }
 }
 
-public struct Edge {
+public struct Edge: Equatable {
     var source: String
     var destination: String
     var cost: UInt32
@@ -45,7 +45,7 @@ public struct Edge {
 public struct PathFinder {
     var nodes: [String: [String: UInt32]]  // Node: [Node: Cost]
     
-    init(nodes: [String: [String: UInt32]]) {
+    init(nodes: [String: [String: UInt32]] = [:]) {
         self.nodes = nodes
     }
     
