@@ -24,6 +24,24 @@ public struct Path: Equatable {
     }
 }
 
+public struct Edge {
+    var source: String
+    var destination: String
+    var cost: UInt32
+    var isBiDirectional: Bool
+    
+    init(from source: String, to destination: String, cost: UInt32, isBiDirectional: Bool = true) {
+        self.source = source
+        self.destination = destination
+        self.cost = cost
+        self.isBiDirectional = isBiDirectional
+    }
+    
+    public func getReversed() -> Edge {
+        return Edge(from: self.destination, to: self.source, cost: self.cost, isBiDirectional: false)
+    }
+}
+
 public struct PathFinder {
     var nodes: [String: [String: UInt32]]  // Node: [Node: Cost]
     
