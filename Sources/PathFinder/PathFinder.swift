@@ -86,4 +86,17 @@ public struct PathFinder {
         
         return Path()
     }
+    
+    public mutating func addEdge(_ edge: Edge) {
+        // Update edge cost
+        let currentCost: UInt32 = self.nodes[edge.source]?[edge.destination] ?? UInt32.max
+        if !self.nodes.keys.contains(edge.source) {
+            self.nodes[edge.source] = [:]
+        }
+        self.nodes[edge.source]![edge.destination] = min(currentCost, edge.cost)
+        
+        if edge.isBiDirectional {
+            self.addEdge(edge.getReversed())
+        }
+    }
 }
