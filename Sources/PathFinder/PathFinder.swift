@@ -1,3 +1,20 @@
+public struct Path {
+    var nodes: [String]
+    var cost: UInt32
+    
+    init(nodes: [String], cost: UInt32) {
+        self.nodes = nodes
+        self.cost = cost
+    }
+    
+    init(from oldPath: Path, node: String, cost: UInt32) {
+        self.nodes = oldPath.nodes
+        self.nodes.append(node)
+        self.cost = oldPath.cost
+        self.cost += cost
+    }
+}
+
 public struct PathFinder {
     var nodes: [String: [String: UInt32]]  // Node: [Node: Cost]
     
