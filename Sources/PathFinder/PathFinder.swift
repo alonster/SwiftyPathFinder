@@ -1,4 +1,4 @@
-public struct Path {
+public struct Path: Equatable {
     var nodes: [String]
     var cost: UInt32
     
@@ -17,6 +17,10 @@ public struct Path {
         self.nodes.append(node)
         self.cost = oldPath.cost
         self.cost += cost
+    }
+    
+    public static func == (lhs: Path, rhs: Path) -> Bool {
+        return lhs.nodes == rhs.nodes && lhs.cost == rhs.cost
     }
 }
 
