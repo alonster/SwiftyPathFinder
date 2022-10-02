@@ -99,4 +99,8 @@ public struct PathFinder {
             self.addEdge(edge.getReversed())
         }
     }
+    
+    public mutating func addEdges(_ edges: [Edge]) {
+        edges.forEach { self.addEdge($0) }
+    }
 }
