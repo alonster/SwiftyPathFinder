@@ -16,6 +16,20 @@ final class PathTests: XCTestCase {
     }
 }
 
+final class EdgeTests: XCTestCase {
+    func testEquatable() {
+        XCTAssertEqual(Edge(from: "A", to: "B", cost: 2), Edge(from: "A", to: "B", cost: 2))
+        XCTAssertNotEqual(Edge(from: "A", to: "B", cost: 2), Edge(from: "A", to: "B", cost: 1))
+        XCTAssertNotEqual(Edge(from: "A", to: "B", cost: 2), Edge(from: "B", to: "B", cost: 2))
+        XCTAssertNotEqual(Edge(from: "A", to: "B", cost: 2), Edge(from: "A", to: "A", cost: 2))
+    }
+    
+    func testReversed() {
+        let edge = Edge(from: "A", to: "B", cost: 2)
+        XCTAssertEqual(edge.getReversed(), Edge(from: "B", to: "A", cost: 2, isBiDirectional: false))
+    }
+}
+
 final class PathFinderTests: XCTestCase {
     var simpleGraph: [String: [String: UInt32]] = [
         "A": ["B": 2, "C": 6],
@@ -47,5 +61,20 @@ final class PathFinderTests: XCTestCase {
         simpleGraph["H"] = [:]
         let finder = PathFinder(nodes: simpleGraph)
         XCTAssertEqual(finder.getShortestPath(from: "A", to: "H"), Path())
+    }
+    
+    func testAddEdge() {
+        let oldFinder = PathFinder(nodes: simpleGraph)
+        var finder = PathFinder()
+        finder.addEdge(Edge(from: "A", to: "B", cost: 2))
+        finder.addEdge(Edge(from: "A", to: "C", cost: 6))
+        finder.addEdge(Edge(from: "B", to: "D", cost: 5))
+        finder.addEdge(Edge(from: "C", to: "D", cost: 3))
+        finder.addEdge(Edge(from: "D", to: "E", cost: 10))
+        finder.addEdge(Edge(from: "D", to: "F", cost: 13))
+        finder.addEdge(Edge(from: "E", to: "G", cost: 2))
+        finder.addEdge(Edge(from: "E", to: "F", cost: 6))
+        finder.addEdge(Edge(from: "F", to: "G", cost: 6))
+        XCTAssertEqual(finder.nodes, oldFinder.nodes)
     }
 }

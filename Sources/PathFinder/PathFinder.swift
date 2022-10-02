@@ -24,10 +24,28 @@ public struct Path: Equatable {
     }
 }
 
+public struct Edge: Equatable {
+    var source: String
+    var destination: String
+    var cost: UInt32
+    var isBiDirectional: Bool
+    
+    init(from source: String, to destination: String, cost: UInt32, isBiDirectional: Bool = true) {
+        self.source = source
+        self.destination = destination
+        self.cost = cost
+        self.isBiDirectional = isBiDirectional
+    }
+    
+    public func getReversed() -> Edge {
+        return Edge(from: self.destination, to: self.source, cost: self.cost, isBiDirectional: false)
+    }
+}
+
 public struct PathFinder {
     var nodes: [String: [String: UInt32]]  // Node: [Node: Cost]
     
-    init(nodes: [String: [String: UInt32]]) {
+    init(nodes: [String: [String: UInt32]] = [:]) {
         self.nodes = nodes
     }
     
@@ -67,5 +85,22 @@ public struct PathFinder {
         }
         
         return Path()
+    }
+    
+    public mutating func addEdge(_ edge: Edge) {
+        // Update edge cost
+        let currentCost: UInt32 = self.nodes[edge.source]?[edge.destination] ?? UInt32.max
+        if !self.nodes.keys.contains(edge.source) {
+            self.nodes[edge.source] = [:]
+        }
+        self.nodes[edge.source]![edge.destination] = min(currentCost, edge.cost)
+        
+        if edge.isBiDirectional {
+            self.addEdge(edge.getReversed())
+        }
+    }
+    
+    public mutating func addEdges(_ edges: [Edge]) {
+        edges.forEach { self.addEdge($0) }
     }
 }
