@@ -2,6 +2,16 @@ public typealias NodeID = String
 public typealias Cost = UInt32
 
 
+private struct Hop: Equatable {
+    var previousNode: NodeID
+    var cost: Cost
+    
+    init(previousNode: NodeID, cost: Cost) {
+        self.previousNode = previousNode
+        self.cost = cost
+    }
+}
+
 public struct Path: Equatable {
     var nodes: [NodeID]
     var cost: Cost
