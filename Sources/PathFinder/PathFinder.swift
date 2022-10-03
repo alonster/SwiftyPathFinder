@@ -1,18 +1,22 @@
+public typealias NodeID = String
+public typealias Cost = UInt32
+
+
 public struct Path: Equatable {
-    var nodes: [String]
-    var cost: UInt32
+    var nodes: [NodeID]
+    var cost: Cost
     
     init() {
         self.nodes = []
-        self.cost = UInt32.max
+        self.cost = Cost.max
     }
     
-    init(nodes: [String], cost: UInt32) {
+    init(nodes: [NodeID], cost: Cost) {
         self.nodes = nodes
         self.cost = cost
     }
     
-    init(from oldPath: Path, node: String, cost: UInt32) {
+    init(from oldPath: Path, node: NodeID, cost: Cost) {
         self.nodes = oldPath.nodes
         self.nodes.append(node)
         self.cost = oldPath.cost
@@ -25,12 +29,12 @@ public struct Path: Equatable {
 }
 
 public struct Edge: Equatable {
-    var source: String
-    var destination: String
-    var cost: UInt32
+    var source: NodeID
+    var destination: NodeID
+    var cost: Cost
     var isBiDirectional: Bool
     
-    init(from source: String, to destination: String, cost: UInt32, isBiDirectional: Bool = true) {
+    init(from source: NodeID, to destination: NodeID, cost: Cost, isBiDirectional: Bool = true) {
         self.source = source
         self.destination = destination
         self.cost = cost
@@ -43,9 +47,9 @@ public struct Edge: Equatable {
 }
 
 public struct PathFinder {
-    var nodes: [String: [String: UInt32]]  // Node: [Node: Cost]
+    var nodes: [NodeID: [NodeID: Cost]]  // Node: [Neighbor: Cost]
     
-    init(nodes: [String: [String: UInt32]] = [:]) {
+    init(nodes: [NodeID: [NodeID: Cost]] = [:]) {
         self.nodes = nodes
     }
     
@@ -54,14 +58,14 @@ public struct PathFinder {
         self.addEdges(edges)
     }
     
-    public func getShortestPath(from start: String, to destination: String) -> Path {
+    public func getShortestPath(from start: NodeID, to destination: NodeID) -> Path {
         // Check edge cases
         if nodes[start] == nil || nodes[destination] == nil { return Path() }
         if start == destination { return Path(nodes: [start], cost: 0) }
         
         // Set unvisited nodes set, current path cost and current path variables
-        var unvisitedNodes: [String] = Array(self.nodes.keys)
-        var currentPath: [String: Path] = [start: Path(nodes: [start], cost: 0)]  // Node: Shortest Path
+        var unvisitedNodes: [NodeID] = Array(self.nodes.keys)
+        var currentPath: [NodeID: Path] = [start: Path(nodes: [start], cost: 0)]  // Node: Shortest Path
         
         // Get start node
         guard let index = unvisitedNodes.firstIndex(of: start) else { return Path() }
@@ -71,7 +75,7 @@ public struct PathFinder {
             // Update neighbors paths cost
             self.nodes[currentNode]?.forEach { neighbor, cost in
                 if unvisitedNodes.contains(neighbor) {
-                    if currentPath[currentNode]!.cost + cost < currentPath[neighbor]?.cost ?? UInt32.max {
+                    if currentPath[currentNode]!.cost + cost < currentPath[neighbor]?.cost ?? Cost.max {
                         currentPath[neighbor] = Path(from: currentPath[currentNode]!,
                                                      node: neighbor, cost: cost)
                     }
@@ -82,7 +86,7 @@ public struct PathFinder {
             // If there is no unvisited node with current path, set currentNode to destination
             currentNode = currentPath.sorted { $0.value.cost < $1.value.cost }.first {
                 unvisitedNodes.contains($0.key) }?.key ?? destination
-            if currentPath[currentNode]?.cost ?? UInt32.max == UInt32.max || currentNode == destination {
+            if currentPath[currentNode]?.cost ?? Cost.max == Cost.max || currentNode == destination {
                 return currentPath[destination] ?? Path()
             }
             guard let index = unvisitedNodes.firstIndex(of: currentNode) else { return Path() }
@@ -94,7 +98,7 @@ public struct PathFinder {
     
     public mutating func addEdge(_ edge: Edge) {
         // Update edge cost
-        let currentCost: UInt32 = self.nodes[edge.source]?[edge.destination] ?? UInt32.max
+        let currentCost: Cost = self.nodes[edge.source]?[edge.destination] ?? Cost.max
         if !self.nodes.keys.contains(edge.source) {
             self.nodes[edge.source] = [:]
         }

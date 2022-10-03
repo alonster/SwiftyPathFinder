@@ -31,7 +31,7 @@ final class EdgeTests: XCTestCase {
 }
 
 final class PathFinderTests: XCTestCase {
-    var simpleGraph: [String: [String: UInt32]] = [
+    var simpleGraph: [NodeID: [NodeID: Cost]] = [
         "A": ["B": 2, "C": 6],
         "B": ["A": 2, "D": 5],
         "C": ["A": 6, "D": 3],
