@@ -41,6 +41,18 @@ final class PathFinderTests: XCTestCase {
         "G": ["E": 2, "F": 6]
     ]
     
+    var simpleGraphEdges = [
+        Edge(from: "A", to: "B", cost: 2),
+        Edge(from: "A", to: "C", cost: 6),
+        Edge(from: "B", to: "D", cost: 5),
+        Edge(from: "C", to: "D", cost: 3),
+        Edge(from: "D", to: "E", cost: 10),
+        Edge(from: "D", to: "F", cost: 13),
+        Edge(from: "E", to: "G", cost: 2),
+        Edge(from: "E", to: "F", cost: 6),
+        Edge(from: "F", to: "G", cost: 6)
+    ]
+    
     func testUnknownStartOrDestination() {
         let finder = PathFinder(nodes: simpleGraph)
         XCTAssertEqual(finder.getShortestPath(from: "0", to: "A"), Path())
@@ -66,15 +78,13 @@ final class PathFinderTests: XCTestCase {
     func testAddEdge() {
         let oldFinder = PathFinder(nodes: simpleGraph)
         var finder = PathFinder()
-        finder.addEdge(Edge(from: "A", to: "B", cost: 2))
-        finder.addEdge(Edge(from: "A", to: "C", cost: 6))
-        finder.addEdge(Edge(from: "B", to: "D", cost: 5))
-        finder.addEdge(Edge(from: "C", to: "D", cost: 3))
-        finder.addEdge(Edge(from: "D", to: "E", cost: 10))
-        finder.addEdge(Edge(from: "D", to: "F", cost: 13))
-        finder.addEdge(Edge(from: "E", to: "G", cost: 2))
-        finder.addEdge(Edge(from: "E", to: "F", cost: 6))
-        finder.addEdge(Edge(from: "F", to: "G", cost: 6))
+        simpleGraphEdges.forEach { finder.addEdge($0) }
+        XCTAssertEqual(finder.nodes, oldFinder.nodes)
+    }
+    
+    func testEdgesInit() {
+        let oldFinder = PathFinder(nodes: simpleGraph)
+        let finder = PathFinder(edges: simpleGraphEdges)
         XCTAssertEqual(finder.nodes, oldFinder.nodes)
     }
 }

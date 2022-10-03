@@ -49,6 +49,11 @@ public struct PathFinder {
         self.nodes = nodes
     }
     
+    init(edges: [Edge]) {
+        self.nodes = [:]
+        self.addEdges(edges)
+    }
+    
     public func getShortestPath(from start: String, to destination: String) -> Path {
         // Check edge cases
         if nodes[start] == nil || nodes[destination] == nil { return Path() }
