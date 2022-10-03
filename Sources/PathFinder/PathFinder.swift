@@ -73,31 +73,33 @@ public struct PathFinder {
         if nodes[start] == nil || nodes[destination] == nil { return Path() }
         if start == destination { return Path(nodes: [start], cost: 0) }
         
-        // Set unvisited nodes set, current path cost and current path variables
+        // Set unvisited nodes set and hops dictionary
         var unvisitedNodes: [NodeID] = Array(self.nodes.keys)
-        var currentPath: [NodeID: Path] = [start: Path(nodes: [start], cost: 0)]  // Node: Shortest Path
+        var hops: [NodeID: Hop] = [start: Hop(previousNode: start, cost: 0)]  // Node: Last Hop
+        
+        let totalCostOf: (NodeID) -> Cost = { node in
+            PathFinder.getTotalCost(of: node, hops: hops) }
+        let fullPathOf: (NodeID) -> Path = { node in
+            PathFinder.getFullPath(of: node, hops: hops) }
         
         // Get start node
         guard let index = unvisitedNodes.firstIndex(of: start) else { return Path() }
         var currentNode = unvisitedNodes.remove(at: index)
         
         while !unvisitedNodes.isEmpty {
-            // Update neighbors paths cost
+            // Update neighbors' paths' cost
             self.nodes[currentNode]?.forEach { neighbor, cost in
-                if unvisitedNodes.contains(neighbor) {
-                    if currentPath[currentNode]!.cost + cost < currentPath[neighbor]?.cost ?? Cost.max {
-                        currentPath[neighbor] = Path(from: currentPath[currentNode]!,
-                                                     node: neighbor, cost: cost)
-                    }
+                // Check if the neighbor is unvisited and if the new possible cost is cheaper than the old one
+                if unvisitedNodes.contains(neighbor) && totalCostOf(currentNode) + cost < totalCostOf(neighbor) {
+                    hops[neighbor] = Hop(previousNode: currentNode, cost: cost)
                 }
             }
             
             // Get next node and remove it from unvisited nodes
-            // If there is no unvisited node with current path, set currentNode to destination
-            currentNode = currentPath.sorted { $0.value.cost < $1.value.cost }.first {
-                unvisitedNodes.contains($0.key) }?.key ?? destination
-            if currentPath[currentNode]?.cost ?? Cost.max == Cost.max || currentNode == destination {
-                return currentPath[destination] ?? Path()
+            // If there is no unvisited node or if the next node is the destination, finish the process
+            currentNode = unvisitedNodes.sorted { totalCostOf($0) < totalCostOf($1) }.first ?? destination
+            if currentNode == destination {
+                return fullPathOf(destination)
             }
             guard let index = unvisitedNodes.firstIndex(of: currentNode) else { return Path() }
             unvisitedNodes.remove(at: index)
