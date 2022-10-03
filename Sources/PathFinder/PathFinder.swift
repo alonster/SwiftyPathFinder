@@ -122,4 +122,28 @@ public struct PathFinder {
     public mutating func addEdges(_ edges: [Edge]) {
         edges.forEach { self.addEdge($0) }
     }
+    
+    private static func getTotalCost(of node: NodeID, hops: [NodeID: Hop]) -> Cost {
+        guard let hop = hops[node] else { return Cost.max }
+        // Check if this is the first hop
+        if hop.previousNode == node { return 0 }
+        // Get the previous node's path's cost
+        let previousTotalCost = getTotalCost(of: hop.previousNode, hops: hops)
+        // Check if an error occurred
+        if previousTotalCost == Cost.max { return Cost.max }
+        // Return the path's total cost
+        return previousTotalCost + hop.cost
+    }
+    
+    private static func getFullPath(of node: NodeID, hops: [NodeID: Hop]) -> Path {
+        guard let hop = hops[node] else { return Path() }
+        // Check if this is the first hop
+        if hop.previousNode == node { return Path(nodes: [node], cost: hop.cost) }
+        // Get the previous node's path
+        let previousFullPath = getFullPath(of: hop.previousNode, hops: hops)
+        // Check if an error occurred
+        if previousFullPath == Path() { return Path() }
+        // Return the path of this node
+        return Path(from: previousFullPath, node: node, cost: hop.cost)
+    }
 }
