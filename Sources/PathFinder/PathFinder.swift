@@ -1,3 +1,5 @@
+import OrderedCollections
+
 public typealias NodeID = String
 public typealias Cost = UInt32
 
@@ -75,7 +77,7 @@ public struct PathFinder {
         if start == destination { return Path(nodes: [start], cost: 0) }
         
         // Set unvisited nodes set and hops dictionary
-        var unvisitedNodes: Set<NodeID> = Set(self.nodes.keys)
+        var unvisitedNodes: OrderedSet<NodeID> = OrderedSet(self.nodes.keys)
         var hops: [NodeID: Hop] = [start: Hop(previousNode: start, cost: 0)]  // Node: Last Hop
         
         let totalCostOf: (NodeID) -> Cost? = { node in
