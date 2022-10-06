@@ -114,4 +114,17 @@ final class PathFinderTests: XCTestCase {
             _ = finder.getShortestPath(from: "A", to: "H")
         }
     }
+    
+    func testMaxEdgeCost() {
+        var finder = PathFinder()
+        finder.addEdge(Edge(from: "A", to: "B", cost: Cost.max))
+        XCTAssertEqual(finder.getShortestPath(from: "A", to: "B"), Path(nodes: ["A", "B"], cost: Cost.max))
+    }
+    
+    func testMaxEdgeCostTwoNodes() {
+        var finder = PathFinder()
+        finder.addEdge(Edge(from: "A", to: "B", cost: Cost.max - 1))
+        finder.addEdge(Edge(from: "B", to: "C", cost: 1))
+        XCTAssertEqual(finder.getShortestPath(from: "A", to: "C"), Path(nodes: ["A", "B", "C"], cost: Cost.max))
+    }
 }

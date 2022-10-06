@@ -93,9 +93,10 @@ public struct PathFinder {
             guard let currentPathCost = totalCostOf(currentNode) else { return nil }
             self.nodes[currentNode]?.forEach { neighbor, cost in
                 // Check if the neighbor is unvisited and if the new possible cost is cheaper than the old one
-                if unvisitedNodes.contains(neighbor) && currentPathCost + cost < totalCostOf(neighbor) ?? Cost.max {
+                if unvisitedNodes.contains(neighbor) &&
+                    Cost.isOrderedAscending(currentPathCost + cost, totalCostOf(neighbor)) {
                     hops[neighbor] = Hop(previousNode: currentNode, cost: cost)
-                    unvisitedNodes.sort(from: neighbor) { totalCostOf($0) ?? Cost.max < totalCostOf($1) ?? Cost.max }
+                    unvisitedNodes.sort(from: neighbor) { Cost.isOrderedAscending(totalCostOf($0), totalCostOf($1)) }
                 }
             }
             
@@ -160,5 +161,15 @@ public struct PathFinder {
         guard let previousFullPath = getFullPath(of: hop.previousNode, hops: hops) else { return nil }
         // Return the path of this node
         return Path(from: previousFullPath, node: node, cost: hop.cost)
+    }
+}
+
+extension Cost {
+    /// Compares optional cost values and checks if they are in an ascending order.
+    /// - Returns: true if the left operand is smaller than the right operand, else false.
+    internal static func isOrderedAscending(_ lhs: Cost?, _ rhs: Cost?) -> Bool {
+        guard let rCost = rhs else { return true }
+        guard let lCost = lhs else { return false }
+        return lCost < rCost
     }
 }
