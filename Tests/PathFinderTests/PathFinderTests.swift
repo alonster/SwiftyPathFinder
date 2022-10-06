@@ -97,4 +97,21 @@ final class PathFinderTests: XCTestCase {
         finder.addEdge(Edge(from: "H", to: "I", cost: 2))
         XCTAssertEqual(finder.getShortestPath(from: "A", to: "H"), nil)
     }
+    
+    func testFinderPerformanceSimpleGraph() {
+        let finder = PathFinder(edges: simpleGraphEdges)
+        
+        self.measure {
+            _ = finder.getShortestPath(from: "A", to: "G")
+        }
+    }
+    
+    func testFinderPerformanceNoConnection() {
+        var finder = PathFinder(edges: simpleGraphEdges)
+        finder.addEdge(Edge(from: "H", to: "I", cost: 2))
+        
+        self.measure {
+            _ = finder.getShortestPath(from: "A", to: "H")
+        }
+    }
 }
