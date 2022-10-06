@@ -11,5 +11,19 @@ extension OrderedSet {
     ///
     /// - Complexity: O(log *n*), where *n* is the length of the sequence.
     public mutating func sort(from element: Element, by areInIncreasingOrder: (Element, Element) throws -> Bool) {
+        self.remove(element)
+        var lowIndex = self.startIndex
+        var highIndex = self.endIndex
+        
+        while lowIndex != highIndex {
+            let midIndex = index(lowIndex, offsetBy: distance(from: lowIndex, to: highIndex) / 2)
+            if try! areInIncreasingOrder(element, self[midIndex]) {
+                highIndex = midIndex
+            } else {
+                lowIndex = index(after: midIndex)
+            }
+        }
+        
+        self.insert(element, at: lowIndex)
     }
 }
