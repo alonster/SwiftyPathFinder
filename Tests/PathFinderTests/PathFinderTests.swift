@@ -55,13 +55,18 @@ final class PathFinderTests: XCTestCase {
     
     func testUnknownStartOrDestination() {
         let finder = PathFinder(nodes: simpleGraph)
-        XCTAssertEqual(finder.getShortestPath(from: "0", to: "A"), Path())
-        XCTAssertEqual(finder.getShortestPath(from: "A", to: "0"), Path())
+        XCTAssertEqual(finder.getShortestPath(from: "0", to: "A"), nil)
+        XCTAssertEqual(finder.getShortestPath(from: "A", to: "0"), nil)
     }
     
     func testPathToSameNode() {
         let finder = PathFinder(nodes: simpleGraph)
         XCTAssertEqual(finder.getShortestPath(from: "A", to: "A"), Path(nodes: ["A"], cost: 0))
+    }
+    
+    func testPathToNeighborNode() {
+        let finder = PathFinder(nodes: simpleGraph)
+        XCTAssertEqual(finder.getShortestPath(from: "A", to: "B"), Path(nodes: ["A", "B"], cost: 2))
     }
     
     func testSimpleGraph() {
@@ -72,7 +77,7 @@ final class PathFinderTests: XCTestCase {
     func testNoConnection() {
         simpleGraph["H"] = [:]
         let finder = PathFinder(nodes: simpleGraph)
-        XCTAssertEqual(finder.getShortestPath(from: "A", to: "H"), Path())
+        XCTAssertEqual(finder.getShortestPath(from: "A", to: "H"), nil)
     }
     
     func testAddEdge() {
@@ -86,5 +91,11 @@ final class PathFinderTests: XCTestCase {
         let oldFinder = PathFinder(nodes: simpleGraph)
         let finder = PathFinder(edges: simpleGraphEdges)
         XCTAssertEqual(finder.nodes, oldFinder.nodes)
+    }
+    
+    func testNoConnectionEdge() {
+        var finder = PathFinder(edges: simpleGraphEdges)
+        finder.addEdge(Edge(from: "H", to: "I", cost: 2))
+        XCTAssertEqual(finder.getShortestPath(from: "A", to: "H"), nil)
     }
 }
