@@ -3,7 +3,6 @@ import XCTest
 
 final class PathTests: XCTestCase {
     func testEquatable() {
-        XCTAssertEqual(Path(), Path())
         XCTAssertEqual(Path(nodes: ["A"], cost: 1), Path(nodes: ["A"], cost: 1))
         XCTAssertNotEqual(Path(nodes: ["A"], cost: 1), Path(nodes: ["A"], cost: 2))
         XCTAssertNotEqual(Path(nodes: ["A"], cost: 1), Path(nodes: ["B"], cost: 1))

@@ -3,30 +3,25 @@ public typealias Cost = UInt32
 
 
 private struct Hop: Equatable {
-    var previousNode: NodeID
-    var cost: Cost
+    internal var previousNode: NodeID
+    internal var cost: Cost
     
-    init(previousNode: NodeID, cost: Cost) {
+    internal init(previousNode: NodeID, cost: Cost) {
         self.previousNode = previousNode
         self.cost = cost
     }
 }
 
 public struct Path: Equatable {
-    var nodes: [NodeID]
-    var cost: Cost
+    public var nodes: [NodeID]
+    public var cost: Cost
     
-    init() {
-        self.nodes = []
-        self.cost = Cost.max
-    }
-    
-    init(nodes: [NodeID], cost: Cost) {
+    public init(nodes: [NodeID], cost: Cost) {
         self.nodes = nodes
         self.cost = cost
     }
     
-    init(from oldPath: Path, node: NodeID, cost: Cost) {
+    public init(from oldPath: Path, node: NodeID, cost: Cost) {
         self.nodes = oldPath.nodes
         self.nodes.append(node)
         self.cost = oldPath.cost + cost
@@ -34,12 +29,12 @@ public struct Path: Equatable {
 }
 
 public struct Edge: Equatable {
-    var source: NodeID
-    var destination: NodeID
-    var cost: Cost
-    var isBiDirectional: Bool
+    public var source: NodeID
+    public var destination: NodeID
+    public var cost: Cost
+    public var isBiDirectional: Bool
     
-    init(from source: NodeID, to destination: NodeID, cost: Cost, isBiDirectional: Bool = true) {
+    public init(from source: NodeID, to destination: NodeID, cost: Cost, isBiDirectional: Bool = true) {
         self.source = source
         self.destination = destination
         self.cost = cost
@@ -52,13 +47,13 @@ public struct Edge: Equatable {
 }
 
 public struct PathFinder {
-    var nodes: [NodeID: [NodeID: Cost]]  // Node: [Neighbor: Cost]
+    public var nodes: [NodeID: [NodeID: Cost]]  // Node: [Neighbor: Cost]
     
-    init(nodes: [NodeID: [NodeID: Cost]] = [:]) {
+    public init(nodes: [NodeID: [NodeID: Cost]] = [:]) {
         self.nodes = nodes
     }
     
-    init(edges: [Edge]) {
+    public init(edges: [Edge]) {
         self.nodes = [:]
         self.addEdges(edges)
     }
