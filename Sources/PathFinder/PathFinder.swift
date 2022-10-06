@@ -95,13 +95,13 @@ public struct PathFinder {
                 // Check if the neighbor is unvisited and if the new possible cost is cheaper than the old one
                 if unvisitedNodes.contains(neighbor) && currentPathCost + cost < totalCostOf(neighbor) ?? Cost.max {
                     hops[neighbor] = Hop(previousNode: currentNode, cost: cost)
+                    unvisitedNodes.sort(from: neighbor) { totalCostOf($0) ?? Cost.max < totalCostOf($1) ?? Cost.max }
                 }
             }
             
             // Get next node and remove it from unvisited nodes
             // If there is no unvisited node or if the next node is the destination, finish the process
-            currentNode = unvisitedNodes.sorted {
-                totalCostOf($0) ?? Cost.max < totalCostOf($1) ?? Cost.max }.first ?? destination
+            currentNode = unvisitedNodes.first ?? destination
             if currentNode == destination {
                 return fullPathOf(destination)
             }
