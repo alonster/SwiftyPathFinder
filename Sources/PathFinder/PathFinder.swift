@@ -29,12 +29,7 @@ public struct Path: Equatable {
     init(from oldPath: Path, node: NodeID, cost: Cost) {
         self.nodes = oldPath.nodes
         self.nodes.append(node)
-        self.cost = oldPath.cost
-        self.cost += cost
-    }
-    
-    public static func == (lhs: Path, rhs: Path) -> Bool {
-        return lhs.nodes == rhs.nodes && lhs.cost == rhs.cost
+        self.cost = oldPath.cost + cost
     }
 }
 
@@ -74,7 +69,7 @@ public struct PathFinder {
         if start == destination { return Path(nodes: [start], cost: 0) }
         
         // Set unvisited nodes set and hops dictionary
-        var unvisitedNodes: [NodeID] = Array(self.nodes.keys)
+        var unvisitedNodes: Set<NodeID> = Set(self.nodes.keys)
         var hops: [NodeID: Hop] = [start: Hop(previousNode: start, cost: 0)]  // Node: Last Hop
         
         let totalCostOf: (NodeID) -> Cost = { node in
@@ -83,8 +78,7 @@ public struct PathFinder {
             PathFinder.getFullPath(of: node, hops: hops) }
         
         // Get start node
-        guard let index = unvisitedNodes.firstIndex(of: start) else { return Path() }
-        var currentNode = unvisitedNodes.remove(at: index)
+        guard var currentNode = unvisitedNodes.remove(start) else { return Path() }
         
         while !unvisitedNodes.isEmpty {
             // Update neighbors' paths' cost
@@ -101,8 +95,7 @@ public struct PathFinder {
             if currentNode == destination {
                 return fullPathOf(destination)
             }
-            guard let index = unvisitedNodes.firstIndex(of: currentNode) else { return Path() }
-            unvisitedNodes.remove(at: index)
+            unvisitedNodes.remove(currentNode)
         }
         
         return Path()
