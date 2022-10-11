@@ -11,8 +11,10 @@ Considering the following (simple) nodes graph:
 To find the shortest path from A to G:
 
 ```swift
+import PathFinder
+
 // Set edges
-let edges = [
+let simpleGraphEdges = [
     Edge(from: "A", to: "B", cost: 2),
     Edge(from: "A", to: "C", cost: 6),
     Edge(from: "B", to: "D", cost: 5),
@@ -31,3 +33,15 @@ let finder = PathFinder(edges: simpleGraphEdges)
 finder.getShortestPath(from: "A", to: "G")
 // Returns: Path(nodes: ["A", "B", "D", "E", "G"], cost: 19)
 ```
+
+## Swift Package Manager
+
+Add this package as a dependency within your `Package.swift` file:
+
+```swift
+.package(url: "https://github.com/alonster/SwiftyPathFinder", from: "1.0.0")
+```
+
+## License
+
+SwiftyPathFinder is available under the MIT license. See the [LICENSE.md](LICENSE.md) file for more info.
