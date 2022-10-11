@@ -1,75 +1,83 @@
+import OrderedCollections
+
 public typealias NodeID = String
 public typealias Cost = UInt32
 
 
+/// Represents the hop from the previous node.
 private struct Hop: Equatable {
-    var previousNode: NodeID
-    var cost: Cost
+    internal var previousNode: NodeID
+    internal var cost: Cost
     
-    init(previousNode: NodeID, cost: Cost) {
+    internal init(previousNode: NodeID, cost: Cost) {
         self.previousNode = previousNode
         self.cost = cost
     }
 }
 
+/// Represents a route between nodes.
 public struct Path: Equatable {
-    var nodes: [NodeID]
-    var cost: Cost
+    public var nodes: [NodeID]
+    public var cost: Cost
     
-    init() {
-        self.nodes = []
-        self.cost = Cost.max
-    }
-    
-    init(nodes: [NodeID], cost: Cost) {
+    public init(nodes: [NodeID], cost: Cost) {
         self.nodes = nodes
         self.cost = cost
     }
     
-    init(from oldPath: Path, node: NodeID, cost: Cost) {
+    public init(from oldPath: Path, node: NodeID, cost: Cost) {
         self.nodes = oldPath.nodes
         self.nodes.append(node)
         self.cost = oldPath.cost + cost
     }
 }
 
+/// Represents a connection between two nodes.
 public struct Edge: Equatable {
-    var source: NodeID
-    var destination: NodeID
-    var cost: Cost
-    var isBiDirectional: Bool
+    public var source: NodeID
+    public var destination: NodeID
+    public var cost: Cost
+    public var isBiDirectional: Bool
     
-    init(from source: NodeID, to destination: NodeID, cost: Cost, isBiDirectional: Bool = true) {
+    public init(from source: NodeID, to destination: NodeID, cost: Cost, isBiDirectional: Bool = true) {
         self.source = source
         self.destination = destination
         self.cost = cost
         self.isBiDirectional = isBiDirectional
     }
     
+    /// Gets the reversed edge.
+    /// - Returns: The reversed edge.
     public func getReversed() -> Edge {
         return Edge(from: self.destination, to: self.source, cost: self.cost, isBiDirectional: false)
     }
 }
 
+/// A Dijkstra's algorithm manager.
 public struct PathFinder {
-    var nodes: [NodeID: [NodeID: Cost]]  // Node: [Neighbor: Cost]
+    public var nodes: [NodeID: [NodeID: Cost]]  // Node: [Neighbor: Cost]
     
-    init(nodes: [NodeID: [NodeID: Cost]] = [:]) {
+    public init(nodes: [NodeID: [NodeID: Cost]] = [:]) {
         self.nodes = nodes
     }
     
-    init(edges: [Edge]) {
+    public init(edges: [Edge]) {
         self.nodes = [:]
         self.addEdges(edges)
     }
     
+    /// Gets the shortest path between two nodes.
+    /// - Parameters:
+    ///   - start: The node to start from.
+    ///   - destination: The destination node.
+    /// - Returns: The shortest path between the nodes if there is one, else nil.
     public func getShortestPath(from start: NodeID, to destination: NodeID) -> Path? {
         // Check edge cases
         if nodes[start] == nil || nodes[destination] == nil { return nil }
         if start == destination { return Path(nodes: [start], cost: 0) }
         
         // Set unvisited nodes set and hops dictionary
-        var unvisitedNodes: Set<NodeID> = Set(self.nodes.keys)
+        var unvisitedNodes: OrderedSet<NodeID> = OrderedSet(self.nodes.keys)
         var hops: [NodeID: Hop] = [start: Hop(previousNode: start, cost: 0)]  // Node: Last Hop
         
         let totalCostOf: (NodeID) -> Cost? = { node in
@@ -85,15 +93,16 @@ public struct PathFinder {
             guard let currentPathCost = totalCostOf(currentNode) else { return nil }
             self.nodes[currentNode]?.forEach { neighbor, cost in
                 // Check if the neighbor is unvisited and if the new possible cost is cheaper than the old one
-                if unvisitedNodes.contains(neighbor) && currentPathCost + cost < totalCostOf(neighbor) ?? Cost.max {
+                if unvisitedNodes.contains(neighbor) &&
+                    Cost.isOrderedAscending(currentPathCost + cost, totalCostOf(neighbor)) {
                     hops[neighbor] = Hop(previousNode: currentNode, cost: cost)
+                    unvisitedNodes.sort(from: neighbor) { Cost.isOrderedAscending(totalCostOf($0), totalCostOf($1)) }
                 }
             }
             
             // Get next node and remove it from unvisited nodes
             // If there is no unvisited node or if the next node is the destination, finish the process
-            currentNode = unvisitedNodes.sorted {
-                totalCostOf($0) ?? Cost.max < totalCostOf($1) ?? Cost.max }.first ?? destination
+            currentNode = unvisitedNodes.first ?? destination
             if currentNode == destination {
                 return fullPathOf(destination)
             }
@@ -103,6 +112,8 @@ public struct PathFinder {
         return nil
     }
     
+    /// Adds an edge to the graph.
+    /// - Parameter edge: The edge to add.
     public mutating func addEdge(_ edge: Edge) {
         // Update edge cost
         let currentCost: Cost = self.nodes[edge.source]?[edge.destination] ?? Cost.max
@@ -116,10 +127,17 @@ public struct PathFinder {
         }
     }
     
+    /// Adds multiple edges to the graph.
+    /// - Parameter edges: The edges to add.
     public mutating func addEdges(_ edges: [Edge]) {
         edges.forEach { self.addEdge($0) }
     }
     
+    /// Gets the full cost to get to a node.
+    /// - Parameters:
+    ///   - node: The node's identifier.
+    ///   - hops: The getShortestPath.hops variable.
+    /// - Returns: The current cost of the path from start to node if there is a path, else nil.
     private static func getTotalCost(of node: NodeID, hops: [NodeID: Hop]) -> Cost? {
         guard let hop = hops[node] else { return nil }
         // Check if this is the first hop
@@ -130,6 +148,11 @@ public struct PathFinder {
         return previousTotalCost + hop.cost
     }
     
+    /// Gets the path to node.
+    /// - Parameters:
+    ///   - node: The node's identifier.
+    ///   - hops: The getShortestPath.hops variable.
+    /// - Returns: The path from start to node if there is one, else nil.
     private static func getFullPath(of node: NodeID, hops: [NodeID: Hop]) -> Path? {
         guard let hop = hops[node] else { return nil }
         // Check if this is the first hop
@@ -138,5 +161,15 @@ public struct PathFinder {
         guard let previousFullPath = getFullPath(of: hop.previousNode, hops: hops) else { return nil }
         // Return the path of this node
         return Path(from: previousFullPath, node: node, cost: hop.cost)
+    }
+}
+
+extension Cost {
+    /// Compares optional cost values and checks if they are in an ascending order.
+    /// - Returns: true if the left operand is smaller than the right operand, else false.
+    internal static func isOrderedAscending(_ lhs: Cost?, _ rhs: Cost?) -> Bool {
+        guard let rCost = rhs else { return true }
+        guard let lCost = lhs else { return false }
+        return lCost < rCost
     }
 }
