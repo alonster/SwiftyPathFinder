@@ -1,5 +1,4 @@
 import OrderedCollections
-import AppKit
 
 extension OrderedSet {
     
