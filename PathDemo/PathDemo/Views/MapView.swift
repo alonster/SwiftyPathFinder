@@ -4,11 +4,14 @@
 //
 
 import SwiftUI
+import PathFinder
 
 struct MapView: View {
     @State var nodes: [CGPoint] = []
     @State var start: CGPoint? = nil
     @State var destination: CGPoint? = nil
+    @State var edges: [CGPoint: CGPoint] = [:]
+    @State var pathCost: Cost? = nil
     
     @State private var mode: MapMode = MapMode.setStart
     
@@ -53,13 +56,27 @@ struct MapView: View {
                     if let destination = destination {
                         NodeView(color: .green, offset: destination)
                     }
+                    ForEach(Array(edges.keys), id: \.self) { key in
+                        EdgeView(from: key, to: edges[key]!)
+                    }
                 }
                 .onTapGesture { point in self.handleTapOn(point) }
                 
                 HStack {
+                    VStack(alignment: .leading) {
+                        if let start = start, let destination = destination,
+                            let airDistance = Int(CGPoint.distanceBetween(start, and: destination)) {
+                            Text("Air destination: " + String(airDistance))
+                        }
+                        if let cost = pathCost {
+                            Text("Path cost: " + String(cost))
+                        }
+                    }
+                    .padding()
+                    
                     Spacer()
                     
-                    Button(action: {}) {
+                    Button(action: { self.findShortestPath() }) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 10)
                                 .foregroundColor(.green)
@@ -88,6 +105,43 @@ struct MapView: View {
             self.nodes.append(point)
             break
         }
+    }
+    
+    /// Find the shortest path between the start and destination.
+    private func findShortestPath() {
+        self.edges.removeAll()
+        pathCost = nil
+        
+        var graphEdges: [PFEdge] = []
+        var nodes: [CGPoint] = self.nodes
+        guard let start = self.start else { return }
+        nodes.insert(start, at: 0)
+        guard let destination = self.destination else { return }
+        nodes.insert(destination, at: 1)
+        
+        for index in nodes.indices {
+            for nextNodeIndex in nodes[index + 1 ..< nodes.indices.endIndex].indices {
+                if let cost = self.costOfEdgeBetween(nodes[index], and: nodes[nextNodeIndex]) {
+                    graphEdges.append(
+                        PFEdge(from: NodeID(index), to: NodeID(nextNodeIndex), cost: cost))
+                }
+            }
+        }
+                
+        let finder = PathFinder(edges: graphEdges)
+        if let path = finder.getShortestPath(from: "0", to: "1") {
+            pathCost = path.cost
+            for pathNodeIndex in path.nodes.indices.dropLast() {
+                guard let startIndex = Int(path.nodes[pathNodeIndex]) else { return }
+                guard let destinationIndex = Int(path.nodes[pathNodeIndex + 1]) else { return }
+                self.edges[nodes[startIndex]] = nodes[destinationIndex]
+            }
+        }
+    }
+    
+    private func costOfEdgeBetween(_ first: CGPoint, and second: CGPoint) -> Cost? {
+        let sqDistance = CGPoint.sqDistanceBetween(first, and: second)
+        return sqDistance < pow(100, 2) ? Cost(sqrt(sqDistance)) : nil
     }
 }
 

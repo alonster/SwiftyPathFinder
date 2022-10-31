@@ -173,3 +173,8 @@ extension Cost {
         return lCost < rCost
     }
 }
+
+// Type helpers - can be used when there are structs with the same name.
+public typealias PFPathFinder = PathFinder
+public typealias PFPath = Path
+public typealias PFEdge = Edge
