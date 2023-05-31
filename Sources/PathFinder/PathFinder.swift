@@ -16,7 +16,7 @@ private struct Hop: Equatable {
 }
 
 /// Represents a route between nodes.
-public struct Path: Equatable {
+open class Path: Equatable {
     public var nodes: [NodeID]
     public var cost: Cost
     
@@ -30,10 +30,14 @@ public struct Path: Equatable {
         self.nodes.append(node)
         self.cost = oldPath.cost + cost
     }
+    
+    public static func == (lhs: Path, rhs: Path) -> Bool {
+        return lhs.cost == rhs.cost && lhs.nodes == rhs.nodes
+    }
 }
 
 /// Represents a connection between two nodes.
-public struct Edge: Equatable {
+open class Edge: Equatable {
     public var source: NodeID
     public var destination: NodeID
     public var cost: Cost
@@ -46,6 +50,11 @@ public struct Edge: Equatable {
         self.isBiDirectional = isBiDirectional
     }
     
+    public static func == (lhs: Edge, rhs: Edge) -> Bool {
+        return lhs.source == rhs.source && lhs.destination == rhs.destination &&
+            lhs.cost == rhs.cost && lhs.isBiDirectional == rhs.isBiDirectional
+    }
+    
     /// Gets the reversed edge.
     /// - Returns: The reversed edge.
     public func getReversed() -> Edge {
@@ -54,7 +63,7 @@ public struct Edge: Equatable {
 }
 
 /// A Dijkstra's algorithm manager.
-public struct PathFinder {
+open class PathFinder {
     public var nodes: [NodeID: [NodeID: Cost]]  // Node: [Neighbor: Cost]
     
     public init(nodes: [NodeID: [NodeID: Cost]] = [:]) {
@@ -114,7 +123,7 @@ public struct PathFinder {
     
     /// Adds an edge to the graph.
     /// - Parameter edge: The edge to add.
-    public mutating func addEdge(_ edge: Edge) {
+    public func addEdge(_ edge: Edge) {
         // Update edge cost
         let currentCost: Cost = self.nodes[edge.source]?[edge.destination] ?? Cost.max
         if !self.nodes.keys.contains(edge.source) {
@@ -129,7 +138,7 @@ public struct PathFinder {
     
     /// Adds multiple edges to the graph.
     /// - Parameter edges: The edges to add.
-    public mutating func addEdges(_ edges: [Edge]) {
+    public func addEdges(_ edges: [Edge]) {
         edges.forEach { self.addEdge($0) }
     }
     

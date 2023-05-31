@@ -81,7 +81,7 @@ final class PathFinderTests: XCTestCase {
     
     func testAddEdge() {
         let oldFinder = PathFinder(nodes: simpleGraph)
-        var finder = PathFinder()
+        let finder = PathFinder()
         simpleGraphEdges.forEach { finder.addEdge($0) }
         XCTAssertEqual(finder.nodes, oldFinder.nodes)
     }
@@ -93,7 +93,7 @@ final class PathFinderTests: XCTestCase {
     }
     
     func testNoConnectionEdge() {
-        var finder = PathFinder(edges: simpleGraphEdges)
+        let finder = PathFinder(edges: simpleGraphEdges)
         finder.addEdge(Edge(from: "H", to: "I", cost: 2))
         XCTAssertEqual(finder.getShortestPath(from: "A", to: "H"), nil)
     }
@@ -107,7 +107,7 @@ final class PathFinderTests: XCTestCase {
     }
     
     func testFinderPerformanceNoConnection() {
-        var finder = PathFinder(edges: simpleGraphEdges)
+        let finder = PathFinder(edges: simpleGraphEdges)
         finder.addEdge(Edge(from: "H", to: "I", cost: 2))
         
         self.measure {
@@ -116,13 +116,13 @@ final class PathFinderTests: XCTestCase {
     }
     
     func testMaxEdgeCost() {
-        var finder = PathFinder()
+        let finder = PathFinder()
         finder.addEdge(Edge(from: "A", to: "B", cost: Cost.max))
         XCTAssertEqual(finder.getShortestPath(from: "A", to: "B"), Path(nodes: ["A", "B"], cost: Cost.max))
     }
     
     func testMaxEdgeCostTwoNodes() {
-        var finder = PathFinder()
+        let finder = PathFinder()
         finder.addEdge(Edge(from: "A", to: "B", cost: Cost.max - 1))
         finder.addEdge(Edge(from: "B", to: "C", cost: 1))
         XCTAssertEqual(finder.getShortestPath(from: "A", to: "C"), Path(nodes: ["A", "B", "C"], cost: Cost.max))
